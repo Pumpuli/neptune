@@ -1,5 +1,14 @@
 {
   "name": "neptune-server",
   "version": "0.1.0",
-  "private": true
+  "private": true,
+  "scripts": {
+    "start": "nodemon index.js"
+  },
+  "dependencies": {
+    "koa": "^2.13.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.4"
+  }
 }
