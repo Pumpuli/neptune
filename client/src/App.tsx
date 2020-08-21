@@ -4,7 +4,7 @@ import './App.css';
 
 function App() {
 	function roomAlert() {
-		alert("In the future this button will create a new room. \nBut not today.")
+		alert('In the future this button will create a new room. \nBut not today.');
 	}
 
 	return (
