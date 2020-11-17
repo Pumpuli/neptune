@@ -3,12 +3,20 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "start": "nodemon index.js"
+    "start": "open-cli \"http://localhost:3001/\" && nodemon index.js"
   },
   "dependencies": {
-    "koa": "^2.13.0"
+    "koa": "^2.13.0",
+    "koa-send": "^5.0.1",
+    "nanoid": "^3.1.16",
+    "ws": "^7.4.0"
   },
   "devDependencies": {
-    "nodemon": "^2.0.4"
+    "nodemon": "^2.0.6",
+    "open-cli": "^6.0.1"
+  },
+  "prettier": {
+    "singleQuote": true,
+    "printWidth": 120
   }
 }

@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>WS test</title>
+		<style>
+			#log {
+				height: 10rem;
+				white-space: pre;
+				background-color: #ccc;
+				font-family: monospace;
+				overflow: auto;
+			}
+
+			form {
+				display: block;
+			}
+
+			#input-chat {
+				width: 24rem;
+			}
+		</style>
+	</head>
+	<body>
+		<h1>Ok</h1>
+		<button type="button" id="button-reconnect">Reconnect</button>
+		<button type="button" id="button-create" disabled>Create</button>
+		<form id="form-join">
+			<input type="text" placeholder="Room code" id="input-join" />
+			<button type="submit" id="button-join" disabled>Join</button>
+		</form>
+		<form id="form-chat">
+			<input type="text" placeholder="chat" id="input-chat" />
+			<button type="submit" id="button-chat">Send</button>
+		</form>
+
+		<div id="log"></div>
+
+		<script>
+			/** @type WebSocket */
+			let ws;
+			/** @type string */
+			let client_id;
+
+			function log(...args) {
+				console.log(...args);
+
+				const log = document.getElementById('log');
+
+				log.appendChild(document.createTextNode(args.map((arg) => JSON.stringify(arg)).join(' ') + '\n'));
+
+				log.scrollTop = log.scrollHeight;
+			}
+
+			function reconnect() {
+				ws = new WebSocket(`ws://${location.host}/play`);
+
+				ws.addEventListener('open', () => {
+					log('Opened');
+
+					ws.send(
+						JSON.stringify({
+							type: 'connect',
+							client: client_id,
+						})
+					);
+				});
+
+				ws.addEventListener('close', () => {
+					buttons.forEach((btn) => (btn.disabled = true));
+				});
+
+				ws.addEventListener('message', (event) => {
+					try {
+						const message = JSON.parse(event.data);
+						log('Received:', message);
+
+						switch (message.type) {
+							case 'connect':
+								client_id = message.client;
+								buttons.forEach((btn) => (btn.disabled = false));
+								break;
+							case 'join':
+								log(`Joined room ${message.room}`);
+								break;
+						}
+					} catch (e) {
+						return;
+					}
+				});
+			}
+
+			const buttons = [
+				document.getElementById('button-create'),
+				document.getElementById('button-join'),
+				document.getElementById('button-chat'),
+			];
+
+			document.getElementById('button-reconnect').addEventListener('click', reconnect);
+
+			document.getElementById('button-create').addEventListener('click', () => {
+				ws.send(JSON.stringify({ type: 'create' }));
+			});
+
+			document.getElementById('button-join').addEventListener('click', () => {
+				ws.send(JSON.stringify({ type: 'join' }));
+			});
+
+			document.getElementById('form-chat').addEventListener('submit', (event) => {
+				event.preventDefault();
+
+				const input = document.getElementById('input-chat');
+				const text = input.value;
+
+				if (!text) {
+					return;
+				}
+
+				ws.send(JSON.stringify({ type: 'chat', text }));
+
+				input.value = '';
+			});
+
+			document.getElementById('form-join').addEventListener('submit', (event) => {
+				event.preventDefault();
+
+				const input = document.getElementById('input-join');
+				const code = input.value;
+
+				if (!code) {
+					return;
+				}
+
+				ws.send(JSON.stringify({ type: 'join', room: code }));
+
+				input.value = '';
+			});
+
+			reconnect();
+		</script>
+	</body>
+</html>
